@@ -1,1 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+  >
 
+  <meta name="theme-color" content="#05070a">
+
+  <title>NEX STRIKE</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html,
+    body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #05070a;
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .page {
+      width: 100%;
+      height: 100%;
+      min-height: 100dvh;
+      background:
+        radial-gradient(circle at 50% 20%, #18212c 0, #080b10 42%, #030405 100%);
+    }
+
+    .lobby {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .brand {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .logo {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 17px;
+      border: 2px solid #fff;
+      border-radius: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 900;
+      font-size: 25px;
+      transform: skew(-6deg);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 37px;
+      letter-spacing: 4px;
+      font-weight: 900;
+    }
+
+    .brand p {
+      margin: 7px 0 0;
+      color: #7f8995;
+      font-size: 10px;
+      letter-spacing: 3px;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 20px;
+      border: 1px solid #29323c;
+      background: rgba(13, 17, 22, .95);
+      border-radius: 18px;
+    }
+
+    .system-title {
+      font-size: 11px;
+      letter-spacing: 2px;
+      color: #7e8995;
+      margin-bottom: 15px;
+    }
+
+    .check {
+      padding: 10px 0;
+      border-bottom: 1px solid #1b222a;
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+    }
+
+    .ready {
+      color: #57e287;
+    }
+
+    .field {
+      margin-top: 18px;
+    }
+
+    .field label {
+      display: block;
+      color: #7d8792;
+      font-size: 10px;
+      letter-spacing: 2px;
+      margin-bottom: 7px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 14px;
+      background: #080b0f;
+      border: 1px solid #303944;
+      border-radius: 10px;
+      color: white;
+      outline: none;
+    }
+
+    .launch {
+      width: 100%;
+      margin-top: 18px;
+      padding: 17px;
+      border: 0;
+      border-radius: 11px;
+      background: #fff;
+      color: #05070a;
+      font-weight: 900;
+      letter-spacing: 2px;
+      cursor: pointer;
+    }
+
+    .launch:active {
+      transform: scale(.98);
+    }
+
+    .message {
+      min-height: 18px;
+      margin-top: 12px;
+      color: #7f8995;
+      text-align: center;
+      font-size: 11px;
+    }
+
+    .game {
+      display: none;
+      width: 100%;
+      height: 100%;
+      min-height: 100dvh;
+      position: relative;
+      background: #080b0f;
+    }
+
+    .topbar {
+      position: absolute;
+      z-index: 20;
+      left: 0;
+      top: 0;
+      width: 100%;
+      padding:
+        max(12px, env(safe-area-inset-top))
+        14px
+        12px;
+      background: rgba(3, 5, 7, .88);
+      border-bottom: 1px solid #242c35;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .game-title {
+      font-size: 14px;
+      font-weight: 900;
+      letter-spacing: 2px;
+    }
+
+    .connection {
+      font-size: 9px;
+      letter-spacing: 1px;
+      color: #55df85;
+    }
+
+    .arena {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 53px;
+      bottom: 0;
+      overflow: hidden;
+      background:
+        linear-gradient(#10151b 1px, transparent 1px),
+        linear-gradient(90deg, #10151b 1px, transparent 1px),
+        #080b0f;
+      background-size: 35px 35px;
+    }
+
+    .arena::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle, transparent 30%, rgba(0,0,0,.5));
+    }
+
+    .player {
+      position: absolute;
+      width: 38px;
+      height: 38px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      border: 2px solid white;
+      background: #1a2028;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 9px;
+      font-weight: 900;
+    }
+
+    .enemy {
+      border-color: #ff5555;
+      background: #291012;
+    }
+
+    .healthbar {
+      position: absolute;
+      width: 48px;
+      height: 5px;
+      left: 50%;
+      top: -11px;
+      transform: translateX(-50%);
+      background: #252a30;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .healthfill {
+      width: 100%;
+      height: 100%;
+      background: #54e47f;
+    }
+
+    .nameplate {
+      position: absolute;
+      top: 42px;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+      font-size: 8px;
+      color: #b7c0ca;
+    }
+
+    .hud {
+      position: absolute;
+      z-index: 30;
+      left: 12px;
+      bottom: 15px;
+      padding: 10px 12px;
+      background: rgba(4,6,8,.8);
+      border: 1px solid #252d36;
+      border-radius: 10px;
+      font-size: 10px;
+      line-height: 1.7;
+    }
+
+    .controls {
+      position: absolute;
+      z-index: 40;
+      right: 18px;
+      bottom: 20px;
+      width: 150px;
+      height: 150px;
+    }
+
+    .control {
+      position: absolute;
+      width: 47px;
+      height: 47px;
+      border-radius: 50%;
+      border: 1px solid #3a444f;
+      background: rgba(15,19,24,.9);
+      color: #fff;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+    }
+
+    #up {
+      left: 51px;
+      top: 0;
+    }
+
+    #left {
+      left: 0;
+      top: 51px;
+    }
+
+    #down {
+      left: 51px;
+      top: 51px;
+    }
+
+    #right {
+      right: 0;
+      top: 51px;
+    }
+
+    .fire {
+      position: absolute;
+      z-index: 40;
+      right: 185px;
+      bottom: 50px;
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      border: 2px solid #ff5a5a;
+      background: rgba(60,10,12,.85);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+
+    .waiting {
+      position: absolute;
+      z-index: 50;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      width: 80%;
+      pointer-events: none;
+    }
+
+    .waiting strong {
+      display: block;
+      font-size: 14px;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+
+    .waiting span {
+      font-size: 10px;
+      color: #79838e;
+    }
+
+    .back {
+      position: absolute;
+      z-index: 50;
+      top: 62px;
+      right: 12px;
+      padding: 8px 11px;
+      border: 1px solid #303944;
+      border-radius: 8px;
+      background: rgba(5,7,10,.85);
+      color: #fff;
+      font-size: 9px;
+    }
+
+    .dead {
+      display: none;
+      position: absolute;
+      z-index: 100;
+      inset: 0;
+      background: rgba(0,0,0,.78);
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .dead-box {
+      padding: 25px;
+      border: 1px solid #3a424b;
+      border-radius: 15px;
+      background: #0b0e12;
+    }
+
+    .dead h2 {
+      margin: 0 0 12px;
+      letter-spacing: 3px;
+    }
+
+    .respawn {
+      border: 0;
+      background: #fff;
+      color: #000;
+      border-radius: 9px;
+      padding: 13px 22px;
+      font-weight: 900;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="page">
+
+  <!-- LOBBY -->
+  <section id="lobby" class="lobby">
+
+    <div class="brand">
+      <div class="logo">NS</div>
+      <h1>NEX STRIKE</h1>
+      <p>ONLINE COMBAT SYSTEM</p>
+    </div>
+
+    <div class="card">
+
+      <div class="system-title">SYSTEM CHECK</div>
+
+      <div class="check">
+        <span>GAME INTERFACE</span>
+        <span class="ready">READY</span>
+      </div>
+
+      <div class="check">
+        <span>COMBAT ENGINE</span>
+        <span class="ready">READY</span>
+      </div>
+
+      <div class="check">
+        <span>ONLINE LAYER</span>
+        <span id="onlineStatus">WAITING</span>
+      </div>
+
+      <div class="field">
+        <label>PLAYER NAME</label>
+        <input id="playerName" type="text" value="PLAYER" maxlength="20">
+      </div>
+
+      <div class="field">
+        <label>ROOM CODE</label>
+        <input id="roomCode" type="text" value="NEX-PUBLIC-001" maxlength="40">
+      </div>
+
+      <button id="launchButton" class="launch">
+        ENTER COMBAT
+      </button>
+
+      <div id="message" class="message">
+        NEX STRIKE READY
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- GAME -->
+  <section id="game" class="game">
+
+    <div class="topbar">
+      <div class="game-title">NEX STRIKE</div>
+      <div id="connection" class="connection">CONNECTING</div>
+    </div>
+
+    <div id="arena" class="arena">
+
+      <div id="waiting" class="waiting">
+        <strong>WAITING FOR COMBAT</strong>
+        <span>Waiting for another online player to join this room.</span>
+      </div>
+
+    </div>
+
+    <div class="hud">
+      <div>HEALTH: <span id="health">100</span></div>
+      <div>KILLS: <span id="kills">0</span></div>
+      <div>SCORE: <span id="score">0</span></div>
+    </div>
+
+    <button id="backButton" class="back">
+      EXIT
+    </button>
+
+    <button id="fireButton" class="fire">
+      FIRE
+    </button>
+
+    <div class="controls">
+      <button class="control" id="up">▲</button>
+      <button class="control" id="left">◀</button>
+      <button class="control" id="down">▼</button>
+      <button class="control" id="right">▶</button>
+    </div>
+
+    <div id="deadScreen" class="dead">
+      <div class="dead-box">
+        <h2>ELIMINATED</h2>
+        <button id="respawnButton" class="respawn">
+          RESPAWN
+        </button>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+
+<script>
+"use strict";
+
+/* =========================================================
+   NEX STRIKE CLIENT
+   ========================================================= */
+
+const SUPABASE_URL =
+  "https://jacxlmcwwedertcaizdj.supabase.co";
+
+const SUPABASE_KEY =
+  "sb_publishable_LZQ6oY0Re5QuerLsHOtYIQ_llOyeB94";
+
+const FUNCTION_URL =
+  SUPABASE_URL + "/functions/v1/nex-match";
+
+const supabaseClient =
+  window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_KEY
+  );
+
+
+let session = null;
+let channel = null;
+let matchId = null;
+let myPlayerId = null;
+
+let players = [];
+
+let playerName = "PLAYER";
+let roomCode = "NEX-PUBLIC-001";
+
+let localX = 50;
+let localY = 50;
+
+let moving = {
+  up: false,
+  down: false,
+  left: false,
+  right: false
+};
+
+let moveTimer = null;
+let snapshotTimer = null;
+
+
+/* =========================================================
+   ELEMENTS
+   ========================================================= */
+
+const lobby =
+  document.getElementById("lobby");
+
+const game =
+  document.getElementById("game");
+
+const launchButton =
+  document.getElementById("launchButton");
+
+const playerNameInput =
+  document.getElementById("playerName");
+
+const roomCodeInput =
+  document.getElementById("roomCode");
+
+const message =
+  document.getElementById("message");
+
+const onlineStatus =
+  document.getElementById("onlineStatus");
+
+const connection =
+  document.getElementById("connection");
+
+const arena =
+  document.getElementById("arena");
+
+const waiting =
+  document.getElementById("waiting");
+
+const health =
+  document.getElementById("health");
+
+const kills =
+  document.getElementById("kills");
+
+const score =
+  document.getElementById("score");
+
+const deadScreen =
+  document.getElementById("deadScreen");
+
+
+/* =========================================================
+   SAFE MESSAGE
+   ========================================================= */
+
+function setMessage(text) {
+  message.textContent = text;
+}
+
+
+/* =========================================================
+   SHOW GAME
+   ========================================================= */
+
+function showGame() {
+  lobby.style.display = "none";
+  game.style.display = "block";
+}
+
+
+/* =========================================================
+   SHOW LOBBY
+   ========================================================= */
+
+function showLobby() {
+  game.style.display = "none";
+  lobby.style.display = "flex";
+}
+
+
+/* =========================================================
+   SERVER REQUEST
+   ========================================================= */
+
+async function serverRequest(action, data = {}) {
+
+  if (!session) {
+    throw new Error("Authentication session missing.");
+  }
+
+  const response = await fetch(FUNCTION_URL, {
+    method: "POST",
+
+    headers: {
+      "Content-Type": "application/json",
+      "apikey": SUPABASE_KEY,
+      "Authorization":
+        "Bearer " + session.access_token
+    },
+
+    body: JSON.stringify({
+      action,
+      ...data
+    })
+  });
+
+  const text = await response.text();
+
+  let result;
+
+  try {
+    result = text ? JSON.parse(text) : {};
+  } catch {
+    throw new Error(
+      "Server returned invalid response."
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      result.error ||
+      result.message ||
+      "Server request failed."
+    );
+  }
+
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  return result;
+}
+
+
+/* =========================================================
+   AUTHENTICATION
+   ========================================================= */
+
+async function authenticate() {
+
+  connection.textContent = "AUTHENTICATING";
+  onlineStatus.textContent = "CONNECTING";
+
+  const current =
+    await supabaseClient.auth.getSession();
+
+  session = current.data.session;
+
+  if (!session) {
+
+    const result =
+      await supabaseClient.auth.signInAnonymously();
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    session = result.data.session;
+  }
+
+  if (!session) {
+    throw new Error(
+      "Unable to create online session."
+    );
+  }
+}
+
+
+/* =========================================================
+   REALTIME
+   ========================================================= */
+
+function setupRealtime() {
+
+  if (channel) {
+    supabaseClient.removeChannel(channel);
+  }
+
+  channel =
+    supabaseClient.channel(
+      "nex-strike:" + roomCode
+    );
+
+  channel
+    .on(
+      "broadcast",
+      { event: "server_snapshot" },
+      payload => {
+        processSnapshot(payload.payload);
+      }
+    )
+
+    .on(
+      "broadcast",
+      { event: "server_move" },
+      payload => {
+        processMove(payload.payload);
+      }
+    )
+
+    .on(
+      "broadcast",
+      { event: "server_combat" },
+      payload => {
+        processCombat(payload.payload);
+      }
+    )
+
+    .on(
+      "broadcast",
+      { event: "server_respawn" },
+      payload => {
+        processRespawn(payload.payload);
+      }
+    )
+
+    .subscribe(status => {
+
+      if (status === "SUBSCRIBED") {
+        connection.textContent = "ONLINE";
+        connection.style.color = "#55df85";
+      }
+
+      if (status === "CHANNEL_ERROR") {
+        connection.textContent = "CHANNEL ERROR";
+      }
+
+      if (status === "TIMED_OUT") {
+        connection.textContent = "TIMEOUT";
+      }
+    });
+}
+
+
+/* =========================================================
+   JOIN
+   ========================================================= */
+
+async function joinMatch() {
+
+  const result =
+    await serverRequest(
+      "join",
+      {
+        roomCode,
+        playerName
+      }
+    );
+
+  if (result.match) {
+    matchId =
+      result.match.id;
+  }
+
+  if (result.player) {
+    myPlayerId =
+      result.player.id ||
+      result.player.player_id;
+  }
+
+  if (result.player) {
+    localX =
+      Number(result.player.pos_x ?? 50);
+
+    localY =
+      Number(result.player.pos_y ?? 50);
+  }
+
+  if (Array.isArray(result.players)) {
+    players = result.players;
+    renderPlayers();
+  }
+
+  if (Array.isArray(result.state)) {
+    players = result.state;
+    renderPlayers();
+  }
+
+  if (result.state &&
+      Array.isArray(result.state.players)) {
+    players =
+      result.state.players;
+
+    renderPlayers();
+  }
+
+  waiting.style.display =
+    "block";
+
+  if (
+    result.match &&
+    result.match.status === "active"
+  ) {
+    waiting.style.display =
+      "none";
+  }
+}
+
+
+/* =========================================================
+   SNAPSHOT
+   ========================================================= */
+
+function processSnapshot(data) {
+
+  if (!data) return;
+
+  if (data.match) {
+    matchId =
+      data.match.id ||
+      matchId;
+  }
+
+  if (data.player) {
+
+    myPlayerId =
+      data.player.id ||
+      data.player.player_id ||
+      myPlayerId;
+
+    localX =
+      Number(data.player.pos_x ?? localX);
+
+    localY =
+      Number(data.player.pos_y ?? localY);
+  }
+
+  if (Array.isArray(data.players)) {
+    players =
+      data.players;
+
+    renderPlayers();
+  }
+
+  if (
+    data.state &&
+    Array.isArray(data.state.players)
+  ) {
+    players =
+      data.state.players;
+
+    renderPlayers();
+  }
+
+  if (
+    data.match &&
+    data.match.status === "active"
+  ) {
+    waiting.style.display = "none";
+  }
+}
+
+
+/* =========================================================
+   SERVER MOVE
+   ========================================================= */
+
+function processMove(data) {
+
+  if (!data) return;
+
+  if (data.player) {
+
+    const id =
+      data.player.id ||
+      data.player.player_id;
+
+    const index =
+      players.findIndex(
+        p =>
+          (p.id || p.player_id) === id
+      );
+
+    if (index >= 0) {
+      players[index] =
+        {
+          ...players[index],
+          ...data.player
+        };
+    } else {
+      players.push(data.player);
+    }
+  }
+
+  if (data.players) {
+    players = data.players;
+  }
+
+  renderPlayers();
+}
+
+
+/* =========================================================
+   COMBAT
+   ========================================================= */
+
+function processCombat(data) {
+
+  if (!data) return;
+
+  if (data.players) {
+    players = data.players;
+    renderPlayers();
+  }
+
+  if (data.player) {
+
+    const id =
+      data.player.id ||
+      data.player.player_id;
+
+    const index =
+      players.findIndex(
+        p =>
+          (p.id || p.player_id) === id
+      );
+
+    if (index >= 0) {
+      players[index] =
+        {
+          ...players[index],
+          ...data.player
+        };
+    }
+  }
+
+  renderPlayers();
+
+  const me =
+    getMyPlayer();
+
+  if (me) {
+
+    health.textContent =
+      Number(me.health ?? 100);
+
+    kills.textContent =
+      Number(me.kills ?? 0);
+
+    score.textContent =
+      Number(me.score ?? 0);
+
+    if (
+      me.alive === false ||
+      Number(me.health) <= 0
+    ) {
+      deadScreen.style.display =
+        "flex";
+    }
+  }
+}
+
+
+/* =========================================================
+   RESPAWN
+   ========================================================= */
+
+function processRespawn(data) {
+
+  if (!data) return;
+
+  if (data.players) {
+    players = data.players;
+    renderPlayers();
+  }
+
+  if (data.player) {
+
+    const id =
+      data.player.id ||
+      data.player.player_id;
+
+    const index =
+      players.findIndex(
+        p =>
+          (p.id || p.player_id) === id
+      );
+
+    if (index >= 0) {
+      players[index] =
+        {
+          ...players[index],
+          ...data.player
+        };
+    }
+  }
+
+  const me =
+    getMyPlayer();
+
+  if (me) {
+
+    health.textContent =
+      Number(me.health ?? 100);
+
+    kills.textContent =
+      Number(me.kills ?? 0);
+
+    score.textContent =
+      Number(me.score ?? 0);
+  }
+
+  deadScreen.style.display =
+    "none";
+
+  renderPlayers();
+}
+
+
+/* =========================================================
+   FIND MY PLAYER
+   ========================================================= */
+
+function getMyPlayer() {
+
+  return players.find(
+    p =>
+      (p.id || p.player_
