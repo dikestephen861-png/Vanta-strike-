@@ -1,0 +1,12 @@
+{
+  "name": "NEX STRIKE",
+  "short_name": "NEX STRIKE",
+  "description": "NEX STRIKE online multiplayer combat system.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "landscape",
+  "background_color": "#05070a",
+  "theme_color": "#05070a",
+  "scope": "./",
+  "icons": []
+}
